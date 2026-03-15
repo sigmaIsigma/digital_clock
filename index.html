@@ -575,6 +575,11 @@
 
             document.body.style.fontWeight = isBold ? 'bold' : 'normal';
 
+            // Reset calendar cache to force re-render with new settings
+            lastCalDay = -1;
+            lastCalMonth = -1;
+            lastCalYear = -1;
+
             initAudio();
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
             

@@ -10,6 +10,7 @@ A clean, minimalist digital clock and calendar web application designed to be us
   - 12h/24h time format.
   - Regular or Bold font weight.
   - Adjustable scale (10% to 300%).
+  - Highlight style for "Today" (Round/Square), configurable separately for weekdays and weekends.
 - **Interactive Calendar**: Automatically updates and adjusts layout for portrait and landscape orientations.
 - **Audio Feedback**: Subtle beeps for seconds and top of the hour (can be muted).
 - **PWA Support**: Installable as a standalone app on supported browsers.
