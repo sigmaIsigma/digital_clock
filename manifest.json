@@ -1,6 +1,6 @@
 {
   "name": "Digital Clock",
-  "short_name": "Clock",
+  "short_name": "DigtalClock",
   "description": "A clean, minimalist digital clock and calendar full-screen dashboard.",
   "start_url": "./index.html",
   "scope": "./",
