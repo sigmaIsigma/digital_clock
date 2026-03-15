@@ -17,7 +17,7 @@ A clean, minimalist digital clock and calendar web application designed to be us
 
 ## Installation / Usage
 
-Simply host the files on any static web server or open `index.html` in your browser.
+Simply host the files on any static web server or open [this page](https://sigmaisigma.github.io/digital_clock/) in your browser.
 
 1. Configure your preferences on the "CLICK TO START" screen.
 2. Click the button to start the clock.
