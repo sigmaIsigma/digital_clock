@@ -31,8 +31,8 @@
 ## クレジット & ライセンス
 
 - **フォント**: [Ubuntu Mono](https://fonts.google.com/specimen/Ubuntu+Mono) - [Ubuntu Font License (UFL)](https://ubuntu.com/legal/font-licence) に基づいてライセンスされています。
-- **著作権**: © 2026 sigmaIsigma
-- **コード**: オープンソースです。自由に使用・変更していただいて構いません。
+- **コード**: [MIT License](LICENSE)
+- **著作権**: © 2026 σiΣ
 
 ---
 *注：このプロジェクトは、シンプルさとさまざまな画面サイズへの対応に重点を置いて作成されました。*

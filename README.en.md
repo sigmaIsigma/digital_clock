@@ -31,8 +31,8 @@ Simply host the files on any static web server or open `index.html` in your brow
 ## Credits & License
 
 - **Font**: [Ubuntu Mono](https://fonts.google.com/specimen/Ubuntu+Mono) - Licensed under the [Ubuntu Font License (UFL)](https://ubuntu.com/legal/font-licence).
-- **Copyright**: © 2026 sigmaIsigma
-- **Code**: Open-source. Feel free to use and modify.
+- **Code**: [MIT License](LICENSE)
+- **Copyright**: (c) 2026 σiΣ
 
 ---
 *Note: This project was built with a focus on simplicity and responsiveness across different screen sizes.*
