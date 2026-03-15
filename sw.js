@@ -2,7 +2,6 @@ const CACHE_NAME = 'clock-v1.2';
 const ASSETS = [
   './index.html',
   './manifest.json',
-  './favicon.svg',
   './favicon.png',
   './favicon.ico'
 ];
