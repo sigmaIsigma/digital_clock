@@ -1,0 +1,25 @@
+{
+  "name": "Digital Clock",
+  "short_name": "Clock",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#000a28",
+  "theme_color": "#000a28",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon.svg",
+      "sizes": "48x48",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    }
+  ]
+}

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Digital Clock</title>
+    <!-- PWA & Favicon -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="apple-touch-icon" href="favicon.png">
+    <link rel="shortcut icon" href="favicon.ico">
+    <meta name="theme-color" content="#000a28">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: rgb(0, 10, 40);
+            color: white;
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Ubuntu Mono', monospace;
+            font-weight: bold; /* Default, will be updated by JS */
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: none;
+        }
+
+        #clock-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        #date-display {
+            line-height: 1;
+            text-align: center;
+        }
+
+        #time-row {
+            display: flex;
+            align-items: baseline;
+            line-height: 1;
+            justify-content: center;
+        }
+
+        .time-part {
+            white-space: pre;
+        }
+
+        /* Calendar Styles */
+        #calendar-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .cal-cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cal-header {
+            color: rgb(150, 150, 150);
+        }
+
+        .cal-day {
+            color: rgb(220, 220, 220);
+        }
+        
+        .cal-sunday {
+            color: rgb(255, 100, 100);
+        }
+
+        .cal-saturday {
+            color: rgb(90, 150, 200);
+        }
+
+        .cal-today-sun {
+            background-color: rgb(255, 100, 100);
+            color: white;
+        }
+
+        .cal-today-sat {
+            background-color: rgb(90, 150, 200);
+            color: white;
+        }
+
+        .cal-today-weekday {
+            background-color: white;
+            color: rgb(0, 60, 110);
+            border-radius: 100%;
+        }
+
+        /* Overlay & Settings */
+        #overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 10, 40, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.3s;
+            font-weight: normal; /* Use regular font for settings */
+            touch-action: none; /* Prevent double-tap zoom and gestures on the overlay */
+        }
+        #overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #settings-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+        }
+
+        .setting-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .setting-item input[type="number"],
+        .setting-item input[type="time"],
+        .setting-item select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid white;
+            color: white;
+            padding: 5px;
+            font-family: 'Ubuntu Mono', monospace;
+            font-size: 1rem;
+        }
+
+        .setting-item select {
+            cursor: pointer;
+        }
+
+        .setting-item select option {
+            background-color: rgb(0, 10, 40);
+            color: white;
+        }
+
+        #start-btn {
+            font-size: 2rem;
+            padding: 20px 40px;
+            border: 2px solid white;
+            color: white;
+            background: transparent;
+            font-family: 'Ubuntu Mono', monospace;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        #start-btn:hover {
+            background: white;
+            color: rgb(0, 10, 40);
+        }
+
+        #guide-text {
+            margin-top: 30px;
+            color: #888;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .overlay-footer {
+            position: absolute;
+            bottom: 20px;
+            width: calc(100% - 40px);
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: #666;
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .overlay-footer a {
+            color: #666;
+            text-decoration: none;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="overlay">
+        <div id="settings-menu">
+            <label class="setting-item">
+                <input type="checkbox" id="check-24h" checked> 24h Mode
+            </label>
+            <label class="setting-item">
+                <input type="checkbox" id="check-bold" checked> Bold Font
+            </label>
+            <label class="setting-item">
+                <input type="checkbox" id="check-mute"> Mute Sound
+            </label>
+            <label class="setting-item">
+                Scale: <input type="number" id="input-scale" value="100" min="10" max="300">%
+            </label>
+            <div class="setting-item">
+                Color: 
+                <select id="select-color">
+                    <option value="auto">Auto</option>
+                    <option value="day">Day Only</option>
+                    <option value="night">Night Only</option>
+                    <option value="custom">Custom</option>
+                </select>
+            </div>
+            <div id="custom-time-settings" style="display: none; flex-direction: column; gap: 10px; margin-left: 20px;">
+                <label class="setting-item">Day Start: <input type="time" id="input-day-start" value="06:30"></label>
+                <label class="setting-item">Night Start: <input type="time" id="input-night-start" value="16:30"></label>
+            </div>
+        </div>
+        <button id="start-btn">CLICK TO START</button>
+        <div id="guide-text">
+            Tap/Click 5 times rapidly to return to settings.
+        </div>
+        <div class="overlay-footer">
+            <div id="copy-left"><b>Copyright: © 2026</b> sigmaIsigma</div>
+            <div id="copy-right"><b>Font:</b> <a href="https://fonts.google.com/specimen/Ubuntu+Mono" target="_blank">Ubuntu Mono</a> (UFL)</div>
+        </div>
+    </div>
+
+    <div id="clock-wrapper">
+        <div id="date-display"></div>
+        <div id="time-row">
+            <div id="ampm-display" class="time-part"></div>
+            <div id="time-display" class="time-part"></div>
+            <div id="sec-display" class="time-part"></div>
+        </div>
+    </div>
+    
+    <div id="calendar-container"></div>
+
+    <script>
+        // --- Configuration ---
+        const COLOR_DAY = "rgb(255, 255, 255)";
+        const COLOR_NIGHT = "rgb(100, 149, 237)";
+        
+        const TICK_HZ = 2000;
+        const LOW_BEEP_HZ = 440;
+        const HIGH_BEEP_HZ = 880;
+
+        const BASE_TIME = 450;
+        const BASE_SEC = 180;
+        const BASE_DATE = 100;
+        const BASE_CAL = 120;
+        const BASE_CAL_SMALL = 90;
+        
+        const PADDING_TIME = 20;
+        
+        // State
+        let use24h = true;
+        let isBold = true;
+        let isMuted = false;
+        let globalScale = 1.0;
+        let colorMode = 'auto';
+        let customDayStart = '06:30';
+        let customNightStart = '16:30';
+        let lastSec = -1;
+        let audioCtx = null;
+        let isRunning = false;
+        let lastCalMonth = -1;
+        let lastCalYear = -1;
+        let lastCalDay = -1;
+
+        // Reset Logic
+        let tapCount = 0;
+        let tapTimer = null;
+
+        const elDate = document.getElementById('date-display');
+        const elAmpm = document.getElementById('ampm-display');
+        const elTime = document.getElementById('time-display');
+        const elSec = document.getElementById('sec-display');
+        const elCal = document.getElementById('calendar-container');
+        const elClockWrapper = document.getElementById('clock-wrapper');
+        const elOverlay = document.getElementById('overlay');
+        const btnStart = document.getElementById('start-btn');
+        
+        const check24h = document.getElementById('check-24h');
+        const checkBold = document.getElementById('check-bold');
+        const checkMute = document.getElementById('check-mute');
+        const inputScale = document.getElementById('input-scale');
+        const selectColor = document.getElementById('select-color');
+        const customTimeDiv = document.getElementById('custom-time-settings');
+        const inputDayStart = document.getElementById('input-day-start');
+        const inputNightStart = document.getElementById('input-night-start');
+
+        selectColor.addEventListener('change', () => {
+            customTimeDiv.style.display = selectColor.value === 'custom' ? 'flex' : 'none';
+        });
+
+        // --- Audio ---
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playTone(freq, duration) {
+            if (isMuted || !audioCtx || audioCtx.state === 'suspended') return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            const now = audioCtx.currentTime;
+            const attack = 0.005;
+            const release = 0.005;
+            let vol = 0.1; 
+            if (freq === TICK_HZ) vol = 0.025;
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(vol, now + attack);
+            gainNode.gain.setValueAtTime(vol, now + duration - release);
+            gainNode.gain.linearRampToValueAtTime(0, now + duration);
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + duration);
+        }
+
+        function handleAudio(s) {
+            if (s === 0) playTone(HIGH_BEEP_HZ, 1.0);
+            else if (s === 30 || (s%10===0 && s!==0)) playTone(HIGH_BEEP_HZ, 0.2);
+            else if (s === 29 || s >= 57) playTone(LOW_BEEP_HZ, 0.1);
+            else playTone(TICK_HZ, 0.05);
+        }
+
+        // --- Calendar ---
+        function getDaysInMonth(month, year) {
+            return new Date(year, month + 1, 0).getDate();
+        }
+
+        function renderCalendar(now) {
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const today = now.getDate();
+
+            if (year === lastCalYear && month === lastCalMonth && today === lastCalDay && elCal.hasChildNodes()) return;
+            lastCalYear = year; lastCalMonth = month; lastCalDay = today;
+
+            elCal.innerHTML = ''; 
+            const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            weekdays.forEach(day => {
+                const div = document.createElement('div');
+                div.className = 'cal-cell cal-header';
+                div.textContent = day;
+                elCal.appendChild(div);
+            });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = getDaysInMonth(month, year);
+
+            for (let i = 0; i < firstDay; i++) {
+                const div = document.createElement('div');
+                div.className = 'cal-cell';
+                elCal.appendChild(div);
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const div = document.createElement('div');
+                div.className = 'cal-cell cal-day';
+                div.textContent = d;
+                const gridPos = firstDay + (d - 1);
+                const wday = gridPos % 7;
+                
+                if (wday === 0) div.classList.add('cal-sunday');
+                if (wday === 6) div.classList.add('cal-saturday');
+                
+                if (d === today) {
+                    if (wday === 0) div.classList.add('cal-today-sun');
+                    else if (wday === 6) div.classList.add('cal-today-sat');
+                    else div.classList.add('cal-today-weekday');
+                }
+                elCal.appendChild(div);
+            }
+        }
+
+        // --- Layout ---
+        function updateLayout() {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+
+            const refW = (w > h) ? 3840.0 : 2160.0;
+            const refH = (w > h) ? 2160.0 : 3840.0;
+            const scaleW = w / refW;
+            const scaleH = h / refH;
+            const scale = Math.min(scaleW, scaleH) * globalScale;
+
+            const sizeTime = Math.max(10, Math.floor(BASE_TIME * scale));
+            const sizeSec = Math.max(5, Math.floor(BASE_SEC * scale));
+            const sizeDate = Math.max(5, Math.floor(BASE_DATE * scale));
+            const sizeCal = Math.max(5, Math.floor(BASE_CAL * scale));
+            const sizeCalHeader = Math.max(5, Math.floor(BASE_CAL_SMALL * scale));
+            const padTime = Math.floor(PADDING_TIME * scale);
+            const calPadding = Math.floor(50 * scale);
+
+            elDate.style.fontSize = `${sizeDate}px`;
+            elTime.style.fontSize = `${sizeTime}px`;
+            elSec.style.fontSize = `${sizeSec}px`;
+            elAmpm.style.fontSize = `${sizeSec}px`;
+
+            elDate.style.marginBottom = `${padTime}px`;
+            elTime.style.marginLeft = use24h ? '0' : `${padTime}px`;
+            elSec.style.marginLeft = `${padTime}px`;
+
+            const secYAdjust = Math.floor(30 * scale);
+            elSec.style.transform = `translateY(-${secYAdjust}px)`;
+            elAmpm.style.transform = `translateY(-${secYAdjust}px)`;
+
+            let maxCalH, maxCalW;
+
+            if (w > h) {
+                document.body.style.flexDirection = 'row';
+                elClockWrapper.style.width = '50%';
+                maxCalW = (w / 2) - (calPadding * 2);
+                maxCalH = h - (calPadding * 2);
+                elCal.style.marginTop = '0';
+                elCal.style.marginLeft = `${calPadding}px`; 
+                elCal.style.marginRight = `${calPadding}px`;
+            } else {
+                document.body.style.flexDirection = 'column';
+                elClockWrapper.style.width = '100%';
+                // Increased bottom margin for portrait
+                maxCalH = h * 0.5; 
+                maxCalW = w - (calPadding * 2);
+                elCal.style.marginTop = `${calPadding}px`;
+                elCal.style.marginLeft = '0';
+                elCal.style.marginRight = '0';
+            }
+            
+            let cellW = maxCalW / 7;
+            if (cellW * 7 > maxCalH) {
+                cellW = maxCalH / 7;
+            }
+            const calW = cellW * 7;
+            
+            elCal.style.width = `${calW}px`;
+            // Ensure there is space at the bottom in portrait
+            elCal.style.marginBottom = (w > h) ? `${calPadding}px` : `${calPadding * 2}px`;
+
+            const headers = elCal.querySelectorAll('.cal-header');
+            headers.forEach(el => el.style.fontSize = `${sizeCalHeader}px`);
+            
+            const cells = elCal.querySelectorAll('.cal-cell');
+            cells.forEach(el => {
+                el.style.fontSize = el.classList.contains('cal-header') ? `${sizeCalHeader}px` : `${sizeCal}px`;
+                el.style.height = `${cellW}px`;
+            });
+        }
+
+        // --- Main Loop ---
+        function update() {
+            if (!isRunning) return;
+
+            const now = new Date();
+            const s = now.getSeconds();
+
+            if (s !== lastSec) {
+                lastSec = s;
+                handleAudio(s);
+            }
+
+            const currentMin = now.getHours() * 60 + now.getMinutes();
+            
+            let isDay;
+            if (colorMode === 'day') {
+                isDay = true;
+            } else if (colorMode === 'night') {
+                isDay = false;
+            } else if (colorMode === 'custom') {
+                const dParts = customDayStart.split(':');
+                const nParts = customNightStart.split(':');
+                const dStart = (parseInt(dParts[0]) || 0) * 60 + (parseInt(dParts[1]) || 0);
+                const nStart = (parseInt(nParts[0]) || 0) * 60 + (parseInt(nParts[1]) || 0);
+                
+                if (dStart < nStart) {
+                    isDay = currentMin >= dStart && currentMin < nStart;
+                } else {
+                    isDay = currentMin >= dStart || currentMin < nStart;
+                }
+            } else {
+                isDay = currentMin >= 390 && currentMin < 990;
+            }
+
+            const textColor = isDay ? COLOR_DAY : COLOR_NIGHT;
+            
+            elDate.style.color = textColor;
+            elTime.style.color = textColor;
+            elSec.style.color = textColor;
+            elAmpm.style.color = textColor;
+            
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const daysArr = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const weekday = daysArr[now.getDay()];
+            elDate.textContent = `${year}/${month}/${day} ${weekday}`;
+
+            let h = now.getHours();
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const secStr = String(s).padStart(2, '0');
+            let ampmStr = "";
+            if (!use24h) {
+                ampmStr = h >= 12 ? "PM" : "AM";
+                h = h % 12;
+                if (h === 0) h = 12;
+            }
+            const hStr = String(h).padStart(2, '0');
+
+            elTime.textContent = `${hStr}:${m}`;
+            elSec.textContent = secStr;
+            elAmpm.textContent = use24h ? "" : ampmStr;
+            elAmpm.style.display = use24h ? "none" : "block";
+            
+            const curD = now.getDate();
+            if (curD !== lastCalDay) {
+                 renderCalendar(now);
+                 updateLayout();
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        function startClock() {
+            use24h = check24h.checked;
+            isBold = checkBold.checked;
+            isMuted = checkMute.checked;
+            globalScale = parseFloat(inputScale.value) / 100.0 || 1.0;
+            colorMode = selectColor.value;
+            customDayStart = inputDayStart.value;
+            customNightStart = inputNightStart.value;
+
+            document.body.style.fontWeight = isBold ? 'bold' : 'normal';
+
+            initAudio();
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            
+            isRunning = true;
+            elOverlay.classList.add('hidden');
+            
+            renderCalendar(new Date());
+            updateLayout();
+            update();
+        }
+
+        function handleTap() {
+            if (!isRunning) return;
+            
+            tapCount++;
+            clearTimeout(tapTimer);
+            
+            if (tapCount >= 5) {
+                isRunning = false;
+                tapCount = 0;
+                elOverlay.classList.remove('hidden');
+            } else {
+                tapTimer = setTimeout(() => {
+                    tapCount = 0;
+                }, 1250);
+            }
+        }
+
+        btnStart.addEventListener('click', (e) => {
+            e.stopPropagation();
+            startClock();
+        });
+        
+        window.addEventListener('click', handleTap);
+        window.addEventListener('resize', updateLayout);
+
+        // Service Worker registration for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => {
+                    console.log('SW registration failed: ', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
