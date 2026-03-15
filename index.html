@@ -104,7 +104,6 @@
         .cal-today-weekday {
             background-color: white;
             color: rgb(0, 60, 110);
-            border-radius: 100%;
         }
 
         /* Overlay & Settings */
@@ -238,6 +237,12 @@
                 <label class="setting-item">Day Start: <input type="time" id="input-day-start" value="06:30"></label>
                 <label class="setting-item">Night Start: <input type="time" id="input-night-start" value="16:30"></label>
             </div>
+            <label class="setting-item">
+                <input type="checkbox" id="check-circle-weekday"> Round Today (Weekday)
+            </label>
+            <label class="setting-item">
+                <input type="checkbox" id="check-circle-weekend"> Round Today (Weekend)
+            </label>
         </div>
         <button id="start-btn">CLICK TO START</button>
         <div id="guide-text">
@@ -285,6 +290,8 @@
         let colorMode = 'auto';
         let customDayStart = '06:30';
         let customNightStart = '16:30';
+        let todayCircleWeekday = false;
+        let todayCircleWeekend = false;
         let lastSec = -1;
         let audioCtx = null;
         let isRunning = false;
@@ -313,6 +320,8 @@
         const customTimeDiv = document.getElementById('custom-time-settings');
         const inputDayStart = document.getElementById('input-day-start');
         const inputNightStart = document.getElementById('input-night-start');
+        const checkCircleWeekday = document.getElementById('check-circle-weekday');
+        const checkCircleWeekend = document.getElementById('check-circle-weekend');
 
         selectColor.addEventListener('change', () => {
             customTimeDiv.style.display = selectColor.value === 'custom' ? 'flex' : 'none';
@@ -392,9 +401,16 @@
                 if (wday === 6) div.classList.add('cal-saturday');
                 
                 if (d === today) {
+                    const isWeekend = (wday === 0 || wday === 6);
                     if (wday === 0) div.classList.add('cal-today-sun');
                     else if (wday === 6) div.classList.add('cal-today-sat');
                     else div.classList.add('cal-today-weekday');
+
+                    if ((isWeekend && todayCircleWeekend) || (!isWeekend && todayCircleWeekday)) {
+                        div.style.borderRadius = '100%';
+                    } else {
+                        div.style.borderRadius = '0%';
+                    }
                 }
                 elCal.appendChild(div);
             }
@@ -554,6 +570,8 @@
             colorMode = selectColor.value;
             customDayStart = inputDayStart.value;
             customNightStart = inputNightStart.value;
+            todayCircleWeekday = checkCircleWeekday.checked;
+            todayCircleWeekend = checkCircleWeekend.checked;
 
             document.body.style.fontWeight = isBold ? 'bold' : 'normal';
 
