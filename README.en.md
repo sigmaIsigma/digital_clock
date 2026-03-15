@@ -1,6 +1,6 @@
 # Digital Clock & Calendar
 
-A clean, minimalist digital clock and calendar web application designed to be used as a full-screen dashboard. Supports PWA for installation on mobile and desktop.
+A clean, minimalist digital clock and calendar web application designed to be used as a full-screen or windowed dashboard. Supports PWA for installation on mobile and desktop.
 
 ## Features
 
