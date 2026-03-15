@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Digital Clock</title>
     <!-- PWA & Favicon -->
     <link rel="manifest" href="manifest.json">
@@ -12,6 +12,7 @@
     <meta name="theme-color" content="#000a28">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +24,7 @@
             margin: 0;
             overflow: hidden;
             height: 100vh;
+            height: 100dvh;
             width: 100vw;
             display: flex;
             flex-direction: column;
@@ -443,10 +445,10 @@
             } else {
                 document.body.style.flexDirection = 'column';
                 elClockWrapper.style.width = '100%';
-                // Increased bottom margin for portrait
-                maxCalH = h * 0.5; 
+                // Refined height for portrait
+                maxCalH = h * 0.45; 
                 maxCalW = w - (calPadding * 2);
-                elCal.style.marginTop = `${calPadding}px`;
+                elCal.style.marginTop = '0';
                 elCal.style.marginLeft = '0';
                 elCal.style.marginRight = '0';
             }
@@ -458,8 +460,8 @@
             const calW = cellW * 7;
             
             elCal.style.width = `${calW}px`;
-            // Ensure there is space at the bottom in portrait
-            elCal.style.marginBottom = (w > h) ? `${calPadding}px` : `${calPadding * 2}px`;
+            // Larger bottom margin for portrait
+            elCal.style.marginBottom = (w > h) ? `${calPadding}px` : `calc(${calPadding}px + 40px)`;
 
             const headers = elCal.querySelectorAll('.cal-header');
             headers.forEach(el => el.style.fontSize = `${sizeCalHeader}px`);

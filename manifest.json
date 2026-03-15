@@ -1,8 +1,11 @@
 {
   "name": "Digital Clock",
   "short_name": "Clock",
-  "start_url": "index.html",
+  "description": "A clean, minimalist digital clock and calendar full-screen dashboard.",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#000a28",
   "theme_color": "#000a28",
   "icons": [
@@ -13,8 +16,9 @@
     },
     {
       "src": "favicon.svg",
-      "sizes": "48x48",
-      "type": "image/svg+xml"
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
       "src": "favicon.ico",
