@@ -243,6 +243,9 @@
             <label class="setting-item">
                 <input type="checkbox" id="check-circle-weekend"> Round Today (Weekend)
             </label>
+            <label class="setting-item">
+                <input type="checkbox" id="check-fullscreen"> Fullscreen
+            </label>
         </div>
         <button id="start-btn">CLICK TO START</button>
         <div id="guide-text">
@@ -302,6 +305,7 @@
         let lastCalMonth = -1;
         let lastCalYear = -1;
         let lastCalDay = -1;
+        let silentLoop = null;
 
         // Reset Logic
         let tapCount = 0;
@@ -326,6 +330,29 @@
         const inputNightStart = document.getElementById('input-night-start');
         const checkCircleWeekday = document.getElementById('check-circle-weekday');
         const checkCircleWeekend = document.getElementById('check-circle-weekend');
+        const checkFullscreen = document.getElementById('check-fullscreen');
+
+        checkCircleWeekend.addEventListener('change', () => {
+            // No action needed, but can be used for immediate re-render if desired
+        });
+
+        checkFullscreen.addEventListener('change', () => {
+            if (checkFullscreen.checked) {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen();
+                }
+            } else {
+                if (document.fullscreenElement || document.webkitFullscreenElement) {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    }
+                }
+            }
+        });
 
         selectColor.addEventListener('change', () => {
             customTimeDiv.style.display = selectColor.value === 'custom' ? 'flex' : 'none';
@@ -334,6 +361,28 @@
         // --- Audio ---
         function initAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function startSilentLoop() {
+            if (!audioCtx || isMuted || silentLoop) return;
+            try {
+                const buffer = audioCtx.createBuffer(1, 1, 44100);
+                silentLoop = audioCtx.createBufferSource();
+                silentLoop.buffer = buffer;
+                silentLoop.loop = true;
+                const gain = audioCtx.createGain();
+                gain.gain.value = 0;
+                silentLoop.connect(gain);
+                gain.connect(audioCtx.destination);
+                silentLoop.start();
+            } catch (e) { console.error("Silent loop failed", e); }
+        }
+
+        function stopSilentLoop() {
+            if (silentLoop) {
+                try { silentLoop.stop(); } catch (e) {}
+                silentLoop = null;
+            }
         }
 
         function playTone(freq, duration) {
@@ -587,6 +636,9 @@
             initAudio();
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
             
+            stopSilentLoop();
+            if (!isMuted) startSilentLoop();
+
             isRunning = true;
             elOverlay.classList.add('hidden');
             
@@ -604,6 +656,7 @@
             if (tapCount >= 5) {
                 isRunning = false;
                 tapCount = 0;
+                stopSilentLoop();
                 elOverlay.classList.remove('hidden');
             } else {
                 tapTimer = setTimeout(() => {
