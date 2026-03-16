@@ -393,8 +393,8 @@
             const now = audioCtx.currentTime;
             const attack = 0.005;
             const release = 0.005;
-            let vol = 0.5; 
-            if (freq === TICK_HZ) vol = 0.025;
+            let vol = 0.75; 
+            if (freq === TICK_HZ) vol = 0.5;
             gainNode.gain.setValueAtTime(0, now);
             gainNode.gain.linearRampToValueAtTime(vol, now + attack);
             gainNode.gain.setValueAtTime(vol, now + duration - release);
