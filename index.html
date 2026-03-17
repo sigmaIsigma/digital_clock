@@ -1,5 +1,13 @@
 <!DOCTYPE html>
 <html lang="ja">
+<!--
+    Digital Clock & Calendar
+    (c) 2026 σiΣ (https://github.com/sigmaIsigma)
+    Released under the MIT License.
+    Font: Ubuntu Mono (Ubuntu Font License)
+    
+    A clean, minimalist digital clock and calendar full-screen dashboard.
+-->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -195,16 +203,23 @@
             width: calc(100% - 40px);
             display: flex;
             justify-content: space-between;
+            align-items: flex-end;
             padding: 0 20px;
-            color: #666;
+            color: rgba(255, 255, 255, 0.3);
             font-size: 1rem;
             pointer-events: none;
         }
 
         .overlay-footer a {
-            color: #666;
-            text-decoration: none;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: underline;
             pointer-events: auto;
+            transition: all 0.2s;
+        }
+
+        .overlay-footer a:hover {
+            color: #fff;
+            text-shadow: 0 0 8px rgba(255,255,255,0.5);
         }
     </style>
 </head>
@@ -252,11 +267,11 @@
             Tap/Click 5 times rapidly to return to settings.
         </div>
         <div class="overlay-footer">
-            <div id="copy-left"><b>Copyright:</b> (c) 2026 σiΣ (<a href="LICENSE" style="color: inherit;">MIT License</a>)</div>
+            <div id="copy-left"><b>Copyright:</b> (c) 2026 <a href="https://github.com/sigmaIsigma" target="_blank" style="color: inherit;">σiΣ</a> (<a href="LICENSE" style="color: inherit;">MIT License</a>)</div>
             <div id="footer-link">
                 <a href="https://github.com/sigmaIsigma/digital_clock" target="_blank">SourceCode (GitHub)</a>
             </div>
-            <div id="copy-right"><b>Font:</b> <a href="https://fonts.google.com/specimen/Ubuntu+Mono" target="_blank">Ubuntu Mono</a> (UFL)</div>
+            <div id="copy-right"><b>Font:</b> <a href="https://fonts.google.com/specimen/Ubuntu+Mono" target="_blank" style="color: inherit;">Ubuntu Mono (UFL)</a></div>
         </div>
 
     </div>
@@ -273,6 +288,12 @@
     <div id="calendar-container"></div>
 
     <script>
+        /**
+         * Digital Clock & Calendar
+         * (c) 2026 σiΣ (https://github.com/sigmaIsigma)
+         * Licensed under MIT License
+         */
+
         // --- Configuration ---
         const COLOR_DAY = "rgb(255, 255, 255)";
         const COLOR_NIGHT = "rgb(100, 149, 237)";
